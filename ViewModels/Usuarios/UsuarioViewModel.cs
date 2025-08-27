@@ -20,11 +20,15 @@ namespace AppRpgEtec.ViewModels.Usuarios
         public void InicializarCommands()
         {
             AutenticarCommand = new Command(async () => await AutenticarUsuario());
+            RegistrarCommand = new Command(async () => await RegistrarUsuario());
+            DirecionarCadastroCommand = new Command(async () => await DirecionarParaCadastro());
         }
 
         private UsuarioService uService;
         public ICommand AutenticarCommand { get; set; }
-       
+        public ICommand RegistrarCommand { get; set; }
+        public ICommand DirecionarCadastroCommand { get; set; }
+
 
         //Meu IP inletex 192.168.2.167
         #region AtributosPropriedades
@@ -90,6 +94,49 @@ namespace AppRpgEtec.ViewModels.Usuarios
                     .DisplayAlert("Informação", ex.Message + ex.InnerException, "Ok");
             }            
         }
+
+        public async Task RegistrarUsuario()//Método para registrar um usuário     
+        {
+            try
+            {
+                Usuario u = new Usuario();
+                u.Username = Login;
+                u.PasswordString = Senha;
+
+                Usuario uRegistrado = await uService.PostRegistrarUsuarioAsync(u);
+
+                if (uRegistrado.Id != 0)
+                {
+                    string mensagem = $"Usuário Id {uRegistrado.Id} registrado com sucesso.";
+                    await Application.Current.MainPage.DisplayAlert("Informação", mensagem, "Ok");
+
+                    await Application.Current.MainPage
+                        .Navigation.PopAsync();//Remove a página da pilha de visualização
+                }
+            }
+            catch (Exception ex)
+            {
+                await Application.Current.MainPage
+                    .DisplayAlert("Informação", ex.Message + " Detalhes: " + ex.InnerException, "Ok");
+            }
+        }
+
+        public async Task DirecionarParaCadastro()//Método para exibição da view de Cadastro      
+        {
+            try
+            {
+                await Application.Current.MainPage.
+                    Navigation.PushAsync(new Views.Usuarios.CadastroView());
+            }
+            catch (Exception ex)
+            {
+                await Application.Current.MainPage
+                    .DisplayAlert("Informação", ex.Message + " Detalhes: " + ex.InnerException, "Ok");
+            }
+        }
+
+
+
         #endregion
     }
 }
